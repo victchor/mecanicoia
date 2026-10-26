@@ -3,10 +3,10 @@ from pathlib import Path
 
 from responder import responder
 
-PRGUNTAS = Path("avaliacao/perguntas.jsonl")
+S = Path("avaliacao/perguntas.jsonl")
 RESULTADOS = Path("avaliacao/resultados.jsonl")
 
-with PRGUNTAS.open(encoding="utf-8") as arquivo:
+with S.open(encoding="utf-8") as arquivo:
     casos = [json.loads(linha) for linha in arquivo if linha.strip()]
 
 acertos = 0

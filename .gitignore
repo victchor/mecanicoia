@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
-
+chroma_db/
+avaliacao/resultados.jsonl
 # Virtual environments
 .venv
