@@ -9,11 +9,11 @@ class GeradorOllama(GeradorDeTexto):
 
     def gerar(self, instrucoes: str, mensagem: str) -> str:
         resposta = ollama.chat(
-            modelo=self.modelo,
-            messages={
+            model=self.modelo,
+            messages=[
                 {"role": "system", "content": instrucoes},
-                {"role": "user", "constname": mensagem},
-            },
-            think=False
+                {"role": "user", "content": mensagem},
+            ],
+            think=False,
         )
         return resposta.message.content

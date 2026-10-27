@@ -12,4 +12,4 @@ class ReranqueadorCrossEncoder(Reranqueador):
         notas = self.modelo.predict([(pergunta, t.texto) for t in trechos])
         for trecho, nota in zip(trechos, notas):
             trecho.nota = float(nota)
-        return sorted(trechos, key=lambda t: t.texto, reverse=True)[:quantidade]
+        return sorted(trechos, key=lambda t: t.nota, reverse=True)[:quantidade]

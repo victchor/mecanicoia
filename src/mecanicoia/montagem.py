@@ -1,4 +1,5 @@
 from mecanicoia.adaptadores.buscador_chroma             import BuscadorChroma
+from mecanicoia.adaptadores.consulta_fipe_parallelum import ConsultaFipeParallelum
 from mecanicoia.adaptadores.divisor_recursivo           import DivisorRecursivo
 from mecanicoia.adaptadores.embeddings_ollama           import EmbeddingsOllama
 from mecanicoia.adaptadores.gerador_ollama              import GeradorOllama
@@ -26,3 +27,6 @@ def criar_indexar_manuais(tamanho_lote: int = 32) -> IndexarManuais:
         repositorio=RepositorioChroma(),
         tamanho_lote=tamanho_lote,
     )
+
+def criar_consulta_de_precos() -> ConsultaFipeParallelum:
+    return ConsultaFipeParallelum()

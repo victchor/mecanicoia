@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Protocol
 
-from mecanicoia.dominio.modelos import Trecho, Chunk
+from mecanicoia.dominio.modelos import Trecho, Chunk, PrecoFipe, Pagina
 
 
 class BuscadorDeTrechos(Protocol):
@@ -15,18 +15,23 @@ class Reranqueador(Protocol):
 class GeradorDeTexto(Protocol):
     def gerar(self, instrucoes: str, mensagem: str) -> str: ...
 
+
 class LeitorDeDocumentos(Protocol):
-    def ler(self, caminho: Path) -> list[str]: ...
+    def ler(self, caminho: Path) -> list[Pagina]: ...
 
 
 class DivisorDeTexto(Protocol):
-    def dividir(self, texto, std) -> list[str]: ...
+    def dividir(self, texto: str) -> list[str]: ...
 
 
 class GeradorDeEmbeddings(Protocol):
-    def gerar(self, texto: list[str]) -> list[list[str]]: ...
+    def gerar(self, texto: list[str]) -> list[list[float]]: ...
 
 
 class RepositorioVetorial(Protocol):
     def ids_existentes(self, ids: list[str]) -> set[str]: ...
     def salvar(self, chunks: list[Chunk], vetores: list[list[float]]) -> None: ...
+
+
+class ConsultaDePrecos(Protocol):
+    def consultar(self, marca: str, modelo: str, ano: int) -> list[PrecoFipe]: ...

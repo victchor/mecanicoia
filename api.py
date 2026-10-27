@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from decimal import Decimal
 
-from mecanicoia.montagem import criar_responder_pergunta
+from mecanicoia.montagem import criar_responder_pergunta, criar_consulta_de_precos
 
 app = FastAPI(title="MecânicoIA")
 responder_pergunta = criar_responder_pergunta()
-
+consulta_de_precos = criar_consulta_de_precos()
 
 class PerguntaEntrada(BaseModel):
     pergunta: str
@@ -20,6 +21,22 @@ class Fonte(BaseModel):
 class RespostaSaida(BaseModel):
     resposta: str
     fontes: list[Fonte]
+
+
+class PrecoSaida(BaseModel):
+    marca: str
+    modelo: str
+    ano_modelo: int
+    combustivel: str
+    codigo_fipe: str
+    valor: Decimal
+    mes_referencia: str
+
+
+@app.get("/precos", response_model=list[PrecoSaida])
+def consultar_preco(marca: str, modelo: str, ano: int):
+    precos = consulta_de_precos.consultar(marca, modelo, ano)
+    return [PrecoSaida(**vars(p)) for p in precos]
 
 
 @app.post("/perguntas", response_model=RespostaSaida)
