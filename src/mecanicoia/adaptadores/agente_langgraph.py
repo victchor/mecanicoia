@@ -1,6 +1,8 @@
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import BaseTool, tool
 from langchain_ollama import ChatOllama
+from langgraph.checkpoint.base import BaseCheckpointSaver
+from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
@@ -20,28 +22,30 @@ class AgenteLangGraph(Assistente):
             reranqueador: Reranqueador,
             modelo: str = "qwen3:8b",
             max_passos: int = 10,
+            checkpointer: BaseCheckpointSaver | None = None,
     ):
         ferramentas = self._criar_ferramentas(consulta_de_precos, buscador, reranqueador)
         self.llm = ChatOllama(model=modelo, reasoning=False).bind_tools(ferramentas)
         self.max_passos = max_passos
-        self.grafo = self._montar_grafo(ferramentas)
+        self.grafo = self._montar_grafo(ferramentas, checkpointer or InMemorySaver())
 
-    def responder(self, pergunta: str) -> str:
-        resultado = self.grafo.invoke({"messages": [HumanMessage(pergunta)]}, {"recursion_limit": self.max_passos})
+    def responder(self, pergunta: str, conversa_id: str) -> str:
+        configuracao = {"configurable": {"thread_id": conversa_id}, "recursion_limit": self.max_passos}
+        resultado = self.grafo.invoke({"messages": [HumanMessage(pergunta)]}, configuracao)
         return resultado["messages"][-1].content
 
     def _agente(self, estado: MessagesState) -> dict:
         resposta = self.llm.invoke([SystemMessage(INSTRUCOES)] + estado["messages"])
         return {"messages": [resposta]}
 
-    def _montar_grafo(self, ferramentas: list[BaseTool]):
+    def _montar_grafo(self, ferramentas: list[BaseTool], checkpointer: BaseCheckpointSaver):
         grafo = StateGraph(MessagesState)
         grafo.add_node("agente", self._agente)
         grafo.add_node("tools", ToolNode(ferramentas))
         grafo.add_edge(START, "agente")
         grafo.add_conditional_edges("agente", tools_condition)
         grafo.add_edge("tools", "agente")
-        return grafo.compile()
+        return grafo.compile(checkpointer=checkpointer)
 
     @staticmethod
     def _criar_ferramentas(

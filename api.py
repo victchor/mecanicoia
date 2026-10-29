@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from decimal import Decimal
@@ -9,8 +11,16 @@ responder_pergunta = criar_responder_pergunta()
 consulta_de_precos = criar_consulta_de_precos()
 assistente = criar_assistente()
 
+
+class AssistenteEntrada(BaseModel):
+    pergunta: str
+    conversa_id: str | None = None
+
+
 class AssistenteSaida(BaseModel):
     resposta: str
+    conversa_id: str
+
 
 class PerguntaEntrada(BaseModel):
     pergunta: str
@@ -51,5 +61,7 @@ def perguntar(entrada: PerguntaEntrada):
 
 
 @app.post("/assistente", response_model=AssistenteSaida)
-def perguntar_ao_assistente(entrada: PerguntaEntrada):
-    return AssistenteSaida(resposta=assistente.responder(entrada.pergunta))
+def perguntar_ao_assistente(entrada: AssistenteEntrada):
+    conversa_id = entrada.conversa_id or str(uuid4())
+    resposta = assistente.responder(entrada.pergunta, conversa_id)
+    return AssistenteSaida(resposta=resposta, conversa_id=conversa_id)
