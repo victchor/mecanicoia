@@ -35,3 +35,6 @@ class RepositorioVetorial(Protocol):
 
 class ConsultaDePrecos(Protocol):
     def consultar(self, marca: str, modelo: str, ano: int) -> list[PrecoFipe]: ...
+
+class Assistente(Protocol):
+    def responder(self, pergunta: str) -> str: ...

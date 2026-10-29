@@ -2,11 +2,15 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from decimal import Decimal
 
-from mecanicoia.montagem import criar_responder_pergunta, criar_consulta_de_precos
+from mecanicoia.montagem import criar_responder_pergunta, criar_consulta_de_precos, criar_assistente
 
 app = FastAPI(title="MecânicoIA")
 responder_pergunta = criar_responder_pergunta()
 consulta_de_precos = criar_consulta_de_precos()
+assistente = criar_assistente()
+
+class AssistenteSaida(BaseModel):
+    resposta: str
 
 class PerguntaEntrada(BaseModel):
     pergunta: str
@@ -44,3 +48,8 @@ def perguntar(entrada: PerguntaEntrada):
     resposta = responder_pergunta.executar(entrada.pergunta)
     fontes = [Fonte(arquivo=t.arquivo, pagina=t.pagina, nota=t.nota) for t in resposta.fontes]
     return RespostaSaida(resposta=resposta.texto, fontes=fontes)
+
+
+@app.post("/assistente", response_model=AssistenteSaida)
+def perguntar_ao_assistente(entrada: PerguntaEntrada):
+    return AssistenteSaida(resposta=assistente.responder(entrada.pergunta))
